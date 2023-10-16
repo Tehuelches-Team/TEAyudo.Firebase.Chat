@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Firebase RealTime Chat</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <!-- navbar -->
+
+    <nav class="navbar navbar-dark bg-dark">
+      <span class="navbar-brand" id="NombreUsuario">ChatTEAyudo</span>
+      <div id="buttons"></div>
+    </nav>
+    <main
+      id="ContenidoWeb"
+      class="mt-2 px-2"
+      style="height: 80vh; overflow-y: scroll"
+    ></main>
+    <!-- cuerpo del chat -->
+    <!-- <div class="d-flex justify-content-end">
+      <span class="badge rounded-pill text-bg-primary"
+        >mensaje del usuario</span
+      >
+    </div> -->
+    <!-- <div class="d-flex justify-content-start">
+      <span class="badge rounded-pill text-bg-secondary"
+        >mensaje del usuario entrante</span
+      >
+    </div> -->
+    <!-- formulario -->
+
+    <form id="Formulario" class="input-group py-3 fixed-bottom container-fluid">
+      <label for="mensaje">Mensaje</label>
+      <div class="input-group mb-3">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Enviar mensaje"
+          aria-label="Recipient's username"
+          aria-describedby="button-addon2"
+          id="Mensaje"
+        />
+        <button
+          class="btn btn-outline-info btn"
+          type="submit"
+          id="button-addon2"
+        >
+          Enviar
+        </button>
+      </div>
+    </form>
+
+    <!-- scripts -->
+    <script type="module" src="../Services/configFirebase.js"></script>
+    <script type="module" src="../Controller/index.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
