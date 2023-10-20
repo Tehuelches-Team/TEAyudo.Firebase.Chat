@@ -9,6 +9,11 @@ import { botones } from "../Controller/index.js";
 import { NombreUsuario } from "../Controller/index.js";
 import { Mensaje } from "../Controller/index.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+import {
+  getMessaging,
+  getToken,
+  onMessage,
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-messaging.js";
 import { Contenido } from "../Controller/index.js";
 import { Formulario } from "../Controller/index.js";
 // Add Firebase products that you want to use
@@ -44,13 +49,68 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth(app);
+//Inicializar servicio de mensajes de notificacion
+export const messaging = getMessaging(app);
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
 const MensajesRef = collection(db, "Mensajes");
 
+//Metodo recibir mensajes en primer plano`
+onMessage(messaging, (payload) => {
+  console.log("Message received. ", payload);
+  // ...
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: "/icon.png",
+  };
+  // self.registration.showNotification(notificationTitle, notificationOptions);
+  window.alert(payload.notification.body);
+});
+
+//Pedir token para recibir notificaciones
+
+async function obtenerToken() {
+  getToken(messaging, {
+    vapidKey:
+      "BCPRBFQphzaDS7QPSoEqXw3Vn62zODm6eXK7i5MkRqsRcYi4G1LphtTK1Zouau9RAI1tYChpvJDvkBbg_IAr8yU",
+  })
+    .then((currentToken) => {
+      if (currentToken) {
+        console.log(currentToken);
+        let _token = currentToken;
+        return _token;
+      } else {
+        // Show permission request UI
+        console.log(
+          "No registration token available. Request permission to generate one."
+        );
+      }
+    })
+    .catch((err) => {
+      console.log("An error occurred while retrieving token. ", err);
+    });
+}
+getToken(messaging, {
+  vapidKey:
+    "BCPRBFQphzaDS7QPSoEqXw3Vn62zODm6eXK7i5MkRqsRcYi4G1LphtTK1Zouau9RAI1tYChpvJDvkBbg_IAr8yU",
+})
+  .then((currentToken) => {
+    if (currentToken) {
+      console.log(currentToken);
+    } else {
+      // Show permission request UI
+      console.log(
+        "No registration token available. Request permission to generate one."
+      );
+    }
+  })
+  .catch((err) => {
+    console.log("An error occurred while retrieving token. ", err);
+  });
 //Verificar que el usuario este logueado
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -117,6 +177,10 @@ const ContenidoChat = (user) => {
       console.log("Mensaje vacio");
       return;
     }
+    let tokenRequest;
+    await obtenerToken().then((token) => {
+      tokenRequest = token;
+    });
     console.log(Mensaje.value);
     try {
       await addDoc(collection(db, "Mensajes"), {
@@ -124,6 +188,9 @@ const ContenidoChat = (user) => {
         NombreUsuario: user.displayName,
         fecha: new Date(),
         Mensaje: Mensaje.value,
+        photoURL: user.photoURL,
+        TokenNotificaciones: tokenRequest,
+        token: user.accessToken,
       });
       console.log("Mensaje enviado", Mensaje.value);
       Mensaje.value = "";
@@ -139,12 +206,17 @@ const ContenidoChat = (user) => {
       querySnapshot.forEach((doc) => {
         if (doc.data().uid === user.uid) {
           Contenido.innerHTML += `<div class="d-flex justify-content-end">
-          <img src="${user.photoURL}" alt="">
+          <img src="${
+            user.photoURL
+          }" alt="" class="rounded float-end" width="20px" height="20px">
           <span class="badge rounded-pill text-bg-primary"
             >${doc.data().Mensaje}</span
           ></div>`;
         } else {
           Contenido.innerHTML += `<div class="d-flex justify-content-start">
+          <img src="${
+            doc.data().photoURL
+          }" alt="" class="rounded float-end" width="20px" height="20px">
           <span class="badge rounded-pill bg-primary text-white"
             >${doc.data().Mensaje}</span
           ></div>`;
