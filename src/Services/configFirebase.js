@@ -57,7 +57,7 @@ export const messaging = getMessaging(app);
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
 const MensajesRef = collection(db, "Mensajes");
-
+const admin = require("firebase-admin");
 //Metodo recibir mensajes en primer plano`
 onMessage(messaging, (payload) => {
   console.log("Message received. ", payload);
@@ -73,33 +73,13 @@ onMessage(messaging, (payload) => {
 
 //Pedir token para recibir notificaciones
 
-async function obtenerToken() {
-  getToken(messaging, {
-    vapidKey:
-      "BCPRBFQphzaDS7QPSoEqXw3Vn62zODm6eXK7i5MkRqsRcYi4G1LphtTK1Zouau9RAI1tYChpvJDvkBbg_IAr8yU",
-  })
-    .then((currentToken) => {
-      if (currentToken) {
-        console.log(currentToken);
-        let _token = currentToken;
-        return _token;
-      } else {
-        // Show permission request UI
-        console.log(
-          "No registration token available. Request permission to generate one."
-        );
-      }
-    })
-    .catch((err) => {
-      console.log("An error occurred while retrieving token. ", err);
-    });
-}
 getToken(messaging, {
   vapidKey:
     "BCPRBFQphzaDS7QPSoEqXw3Vn62zODm6eXK7i5MkRqsRcYi4G1LphtTK1Zouau9RAI1tYChpvJDvkBbg_IAr8yU",
 })
   .then((currentToken) => {
     if (currentToken) {
+      localStorage.setItem("token", currentToken);
       console.log(currentToken);
     } else {
       // Show permission request UI
@@ -177,10 +157,6 @@ const ContenidoChat = (user) => {
       console.log("Mensaje vacio");
       return;
     }
-    let tokenRequest;
-    await obtenerToken().then((token) => {
-      tokenRequest = token;
-    });
     console.log(Mensaje.value);
     try {
       await addDoc(collection(db, "Mensajes"), {
@@ -189,11 +165,23 @@ const ContenidoChat = (user) => {
         fecha: new Date(),
         Mensaje: Mensaje.value,
         photoURL: user.photoURL,
-        TokenNotificaciones: tokenRequest,
-        token: user.accessToken,
+        TokenNotificaciones: localStorage.getItem("token"),
       });
       console.log("Mensaje enviado", Mensaje.value);
       Mensaje.value = "";
+      const message = {
+        notification: {
+          title: "Nuevo mensaje de " + user.displayName,
+          body: Mensaje.value,
+        },
+        token: localStorage.getItem("token"),
+      };
+      const response = await firebase.messaging.send(message);
+      if (response) {
+        console.log("Notificacion enviada");
+      } else {
+        console.log("Notificacion no enviada");
+      }
     } catch (error) {
       console.log(error);
     }
