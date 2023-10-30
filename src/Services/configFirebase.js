@@ -57,7 +57,6 @@ export const messaging = getMessaging(app);
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
 const MensajesRef = collection(db, "Mensajes");
-const admin = require("firebase-admin");
 //Metodo recibir mensajes en primer plano`
 onMessage(messaging, (payload) => {
   console.log("Message received. ", payload);
@@ -176,12 +175,12 @@ const ContenidoChat = (user) => {
         },
         token: localStorage.getItem("token"),
       };
-      const response = await firebase.messaging.send(message);
-      if (response) {
-        console.log("Notificacion enviada");
-      } else {
-        console.log("Notificacion no enviada");
-      }
+      // const response = await firebase.messaging.send(message);
+      // if (response) {
+      //   console.log("Notificacion enviada");
+      // } else {
+      //   console.log("Notificacion no enviada");
+      // }
     } catch (error) {
       console.log(error);
     }
